@@ -20,11 +20,10 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
       - name: Build and Push Docker Image
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          # Runs the 'jib' task which builds and pushes directly to the registry
-          arguments: jib
+        run: ./gradlew jib
         env:
           # These secrets must be set in your GitHub Repo Settings
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
