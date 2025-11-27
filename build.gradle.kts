@@ -33,10 +33,12 @@ jib {
         image = "eclipse-temurin:21-jre-alpine"
     }
     to {
-        // dynamic image name: uses your github secret user + project name
-        // Or hardcode it: "docker.io/myuser/my-ktor-app"
-        image = "docker.io/${System.getenv("DOCKER_USERNAME")}/ktor-app"
-        tags = setOf("latest", version.toString())
+        image = "docker.io/${System.getenv("DOCKER_USERNAME")}/${rootProject.name}"
+        val release = System.getenv("RELEASE_TAG")
+            ?.substringBefore(" ")
+            ?.dropWhile { !it.isDigit() }
+            ?.takeIf { it.isNotEmpty() }
+        tags = release?.let { setOf("latest", it) } ?: setOf(version.toString())
 
         // Credentials are strictly read from Environment Variables for security
         auth {
