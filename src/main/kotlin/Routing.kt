@@ -12,14 +12,13 @@ fun Application.configureRouting() {
 
 
     routing {
-        get("r/{path?}") {
-            val path = call.parameters["path"] ?: return@get call.respondText("No path provided!")
+        val impl: suspend RoutingContext.() -> Unit = impl@ {
+            val path = call.parameters["path"] ?: return@impl call.respondText("No path provided!")
             val normalised = path.lowercase().replace("-", "_")
-            val redirectUrl = pairs[normalised] ?: return@get call.respondText("No redirect found for $path")
+            val redirectUrl = pairs[normalised] ?: return@impl call.respondText("No redirect found for $path")
             call.respondRedirect(redirectUrl)
         }
-        get("/") {
-            call.respondText("Hello World!")
-        }
+        get("r/{path?}", impl)
+        get("/{path?}", impl)
     }
 }
