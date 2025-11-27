@@ -13,18 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21 (Gradle runtime)
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: 'gradle'
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
       - name: Build Kotlin/Native linuxX64 release executable
-        run: ./gradlew buildNative --no-daemon
+        run: ./gradlew linkReleaseExecutableLinuxX64 --no-daemon
 
       - name: Docker login
         run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin

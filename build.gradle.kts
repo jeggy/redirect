@@ -2,14 +2,13 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     kotlin("multiplatform") version "2.2.20"
-    id("io.ktor.plugin") version "3.3.2"
 }
 
 group = "fo.damkjaer"
 version = "0.0.1"
 
 kotlin {
-    linuxX64("linux") {
+    linuxX64 {
         binaries {
             executable {
                 baseName = rootProject.name
@@ -17,7 +16,7 @@ kotlin {
             }
         }
     }
-    macosArm64("macos") {
+    macosArm64 {
         binaries {
             executable {
                 baseName = rootProject.name
@@ -25,7 +24,7 @@ kotlin {
             }
         }
     }
-    jvm("jvm") {
+    jvm {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
         }
@@ -33,8 +32,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation("io.ktor:ktor-server-core")
-            implementation("io.ktor:ktor-server-cio") // CIO engine works on JVM, Linux, and macOS
+            implementation("io.ktor:ktor-server-core:3.3.2")
+            implementation("io.ktor:ktor-server-cio:3.3.2") // CIO engine works on JVM, Linux, and macOS
         }
     }
 }

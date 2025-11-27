@@ -19,15 +19,15 @@ becomes the key after lowercasing and replacing `-` with `_`.
 
 Build locally (Linux):
 ```sh
-./gradlew buildNative
+./gradlew linkReleaseExecutableLinuxX64
 # Result: build/bin/linux/releaseExecutable/redirect.kexe
 ```
 
 Build Docker image locally:
 ```sh
-./gradlew buildNative
-docker build -t your-docker-user/redirect:latest .
-docker run --rm -p 8080:8080 -e REDIRECT_my_app=https://google.com your-docker-user/redirect:latest
+./gradlew linkReleaseExecutableLinuxX64
+docker build --platform linux/amd64 -t your-docker-user/redirect:latest .
+docker run --platform linux/amd64 --rm -p 8080:8080 -e REDIRECT_my_app=https://google.com your-docker-user/redirect:latest
 ```
 
 Notes:
