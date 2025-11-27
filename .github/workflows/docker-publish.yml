@@ -1,4 +1,4 @@
-name: Build and Publish to Docker Hub
+name: Build and Publish Native Image to Docker Hub
 
 on:
   release:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 21 (Gradle runtime)
         uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -22,11 +22,35 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
-      - name: Build and Push Docker Image
-        run: ./gradlew jib
+
+      - name: Build Kotlin/Native linuxX64 release executable
+        run: ./gradlew buildNative --no-daemon
+
+      - name: Docker login
+        run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         env:
-          # These secrets must be set in your GitHub Repo Settings
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          # Contains the tag name (e.g., v1.0.0) only on release events
+
+      - name: Compute image tags
+        id: tags
+        run: |
+          NAME="docker.io/${DOCKER_USERNAME}/${IMAGE_NAME}"
+          if [ -n "${RELEASE_TAG}" ]; then
+            echo "tags=${NAME}:latest,${NAME}:${RELEASE_TAG}" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${NAME}:latest" >> $GITHUB_OUTPUT
+          fi
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          IMAGE_NAME: ${{ github.event.repository.name }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
+
+      - name: Build and push Docker image
+        run: |
+          # Build with all computed tags
+          IFS=',' read -ra TAGS <<< "${{ steps.tags.outputs.tags }}"
+          TAG_ARGS=()
+          for t in "${TAGS[@]}"; do TAG_ARGS+=( -t "$t" ); done
+          docker build ${TAG_ARGS[@]} .
+          for t in "${TAGS[@]}"; do docker push "$t"; done
